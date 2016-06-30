@@ -1,5 +1,6 @@
 package ttr.main;
 
+import ttr.model.player.BasicPlayer;
 import ttr.model.player.HumanPlayer;
 import ttr.model.player.Player;
 import ttr.model.player.ShaoPlayer;
@@ -15,7 +16,7 @@ public class TTRMain {
 		myGame.setFramesPerSecond(60);
 		
 		/* Initialize two players. This can be any combination of human players or AI players */
-		Player player1 = new StupidPlayer("Human Player");
+		Player player1 = new BasicPlayer("Basic Player");
 		Player player2 = new ShaoPlayer("Shao Player");
 		
 		/* Setup the scene, and get the game started */
