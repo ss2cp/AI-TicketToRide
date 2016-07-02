@@ -13,19 +13,21 @@ import ttr.model.destinationCards.Routes;
 import ttr.model.trainCards.TrainCard;
 import ttr.model.trainCards.TrainCardColor;
 
-public class ShaoPlayer extends Player {
+public class SuperPlayer extends Player {
+
+	private int turn = 0;
 
 	/**
 	 * Need to have this constructor so the player has a name, you can use no
 	 * parameters and pass the name of your player to the super constructor, or
 	 * just take in the name as a parameter. Both options are shown here.
 	 * */
-	public ShaoPlayer(String name) {
+	public SuperPlayer(String name) {
 		super(name);
 	}
 
-	public ShaoPlayer() {
-		super("Shao Player");
+	public SuperPlayer() {
+		super("Super Player");
 	}
 
 	/**
@@ -33,7 +35,15 @@ public class ShaoPlayer extends Player {
 	 * */
 	@Override
 	public void makeMove() {
-
+		turn++;
+		double annealingFactor = 0;
+		if (turn < 40) {
+			// 68~100
+			annealingFactor = (1 - (turn / 100)) * 80 + 20;
+		} else {
+			// 0~15
+			annealingFactor = (1 - (turn / 100)) * 100;
+		}
 		// store an instance of the Destination tickets arrayList
 		ArrayList<DestinationTicket> tickets = super.getDestinationTickets();
 		// Store all affordable routes in the ArrayList
@@ -43,20 +53,61 @@ public class ShaoPlayer extends Player {
 
 		// if no more dest ticket, pick from possRoutes
 		if (super.getTotalDestTicketCost() == 0) {
-			if (!possRoutes.isEmpty()) {
-				System.out.println("poss: " + possRoutes);
-				if (possRoutes.get(0).getColor().equals(TrainCardColor.rainbow)) {
-					super.claimRoute(possRoutes.get(0), maxNumOfColor());
-				} else {
-					super.claimRoute(possRoutes.get(0), possRoutes.get(0)
-							.getColor());
-				}
-			}// if no more possRoutes, draw cards
+			// if game is under 40, draw two more
+			if (turn <= 20) {
+				super.drawDestinationTickets();
+			}// if after 40,
 			else {
-
-				super.drawTrainCard(drawCard());
+				// if max number of card is more than 4, and some route of this
+				// color is not claimed and affordable, then claim it
+				if (super.getNumTrainCardsByColor(maxNumOfColor()) >= 5) {
+					if (maxNumOfColor().equals(TrainCardColor.rainbow)) {
+						for (Route route : Routes.getInstance().getAllRoutes()) {
+							if (!isRouteClaimed(route)
+									&& super.getNumTrainCardsByColor(route
+											.getColor()) >= route.getCost()) {
+								super.claimRoute(route, route.getColor());
+							}
+						}
+					} else {
+						for (Route route : Routes.getInstance().getAllRoutes()) {
+							if (maxNumOfColor().equals(route.getColor())
+									&& !isRouteClaimed(route)
+									&& super.getNumTrainCardsByColor(route
+											.getColor()) >= route.getCost()) {
+								super.claimRoute(route, route.getColor());
+							}
+						}
+					}
+				}
+				// if all cards are less than 5
+				else {
+					double randomDecision = (100 * Math.random());
+					if (randomDecision < annealingFactor) {
+						// less than 15% to draw card
+						super.drawTrainCard(drawCard());
+					}// more than 85% of the chance to claim
+					else {
+						if (!possRoutes.isEmpty()) {
+							System.out.println("poss: " + possRoutes);
+							if (possRoutes.get(0).getColor()
+									.equals(TrainCardColor.rainbow)) {
+								super.claimRoute(possRoutes.get(0),
+										maxNumOfColor());
+							} else {
+								super.claimRoute(possRoutes.get(0), possRoutes
+										.get(0).getColor());
+							}
+						}// if no more possRoutes, draw cards
+						else {
+							super.drawTrainCard(drawCard());
+						}
+					}
+				}
 			}
-		} else {
+		}
+		// when there is still ticket left
+		else {
 
 			/**
 			 * test and see if any destination ticket is affordable
@@ -100,17 +151,6 @@ public class ShaoPlayer extends Player {
 			}
 		}
 		super.drawTrainCard(drawCard());
-
-		// // TODO anealing
-		// if (super.getNumTrainCardsByColor(maxNumOfColor()) > 5) {
-		//
-		// for (Route route : Routes.getInstance().getAllRoutes()) {
-		// if (!isRouteClaimed(route)) {
-		// super.claimRoute(route, route.getColor());
-		// }
-		// }
-		// }
-
 	}
 
 	/*

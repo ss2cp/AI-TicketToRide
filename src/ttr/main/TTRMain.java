@@ -5,6 +5,7 @@ import ttr.model.player.HumanPlayer;
 import ttr.model.player.Player;
 import ttr.model.player.ShaoPlayer;
 import ttr.model.player.StupidPlayer;
+import ttr.model.player.SuperPlayer;
 import ttr.view.scenes.TTRGamePlayScene;
 
 public class TTRMain {
@@ -22,7 +23,7 @@ public class TTRMain {
 		 * Initialize two players. This can be any combination of human players
 		 * or AI players
 		 */
-		Player player1 = new BasicPlayer("Basic Player");
+		Player player1 = new SuperPlayer();
 		Player player2 = new ShaoPlayer();
 
 		/* Setup the scene, and get the game started */
