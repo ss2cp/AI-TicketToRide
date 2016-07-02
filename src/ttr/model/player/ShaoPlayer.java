@@ -6,11 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
-import sun.security.krb5.internal.Ticket;
 import ttr.model.destinationCards.Destination;
 import ttr.model.destinationCards.DestinationTicket;
 import ttr.model.destinationCards.Route;
 import ttr.model.destinationCards.Routes;
+import ttr.model.trainCards.TrainCard;
 import ttr.model.trainCards.TrainCardColor;
 
 public class ShaoPlayer extends Player {
@@ -33,99 +33,216 @@ public class ShaoPlayer extends Player {
 	 * */
 	@Override
 	public void makeMove() {
-
+		// store an instance of the Destination tickets arrayList
+		ArrayList<DestinationTicket> tickets = super.getDestinationTickets();
 		// Store all affordable routes in the ArrayList
 		ArrayList<Route> possRoutes = possibleRoutes();
-
 		// sort the list in descending order of cost
 		possRoutes = sortDescen(possRoutes);
 
-		/**
-		 * test and see if any destination ticket is affordable
-		 */
-		// iterate through the tickets
-		for (int i = 0; i < super.getDestinationTickets().size(); i++) {
-			Route nextToBuy = nextTicketRouteToBuy(super
-					.getDestinationTickets().get(i));
-
-			if (checkClaimable(nextToBuy.getDest1(), nextToBuy.getDest2())) {
-				if (super.getNumTrainCardsByColor(nextToBuy.getColor()) >= nextToBuy
-						.getCost()) {
-					System.out.println("Shao is going to buy "
-							+ nextToBuy
-							+ "\nHe has "
-							+ super.getNumTrainCardsByColor(nextToBuy
-									.getColor())
-							+ " cards, and purchase requires "
-							+ nextToBuy.getCost());
-					super.claimRoute(nextToBuy, nextToBuy.getColor());
-
+		// if no more dest ticket, pick from possRoutes
+		if (super.getTotalDestTicketCost() == 0) {
+			if (!possRoutes.isEmpty()) {
+				System.out.println("poss: " + possRoutes);
+				if (possRoutes.get(0).getColor().equals(TrainCardColor.rainbow)) {
+					super.claimRoute(possRoutes.get(0), maxNumOfColor());
 				} else {
-					System.out.println("But Not Enough Money");
+					super.claimRoute(possRoutes.get(0), possRoutes.get(0)
+							.getColor());
 				}
-			} else if (!possRoutes.isEmpty()) {
-				// System.out.println("Player has "
-				// + super.getNumTrainCardsByColor(possRoutes.get(0)
-				// .getColor()) + " " + possRoutes.get(0).getColor()
-				// + " cards.\nThe cost of desired path is "
-				// + possRoutes.get(0).getCost());
-				System.out.println("Shao is going to buy "
-						+ nextToBuy
-						+ "\nHe has "
-						+ super.getNumTrainCardsByColor(possRoutes.get(0)
-								.getColor()) + " cards, and purchase requires "
-						+ possRoutes.get(0).getCost());
-				super.claimRoute(possRoutes.get(0), possRoutes.get(0)
-						.getColor());
+			}// if no more possRoutes, draw cards
+			else {
+
+				super.drawTrainCard(drawCard());
+			}
+		} else {
+
+			/**
+			 * test and see if any destination ticket is affordable
+			 */
+			// iterate through the tickets
+			for (int i = 0; i < tickets.size(); i++) {
+				// return true if at least one route in ticket is affordable
+				if (existAffordableRoute(tickets.get(i))) {
+					System.out.println("ticket " + i
+							+ " DOES have affordable route");
+					nextTicketRouteToBuy(tickets.get(i));
+				}
+
+				else {
+					System.out.println("ticket " + i
+							+ " does NOT have affordable route");
+				}
+			}
+
+			// if the program comes to here, then, there is no route can be
+			// bought
+			// within all tickets
+
+			// so we need to draw cards
+
+			// try to find a rainbow card in the facing up ones first
+			if (drawCard() == 0) {
+
+			} else {
+				Route nextToBuy = nextTicketRouteToBuy(tickets.get(0));
+				for (int j = 0; j < super.getFaceUpCards().size(); j++) {
+					if (nextToBuy != null
+							&& nextToBuy.getColor().equals(
+									super.getFaceUpCards().get(j))) {
+						System.out
+								.println("Found a card that match needed color, drawing it...");
+						super.drawTrainCard(j + 1);
+					}
+				}
+				super.drawTrainCard(drawCard());
 			}
 		}
-		super.drawTrainCard(0);
+		super.drawTrainCard(drawCard());
 
-		/*
-		 * Always draw train cards (0 means we are drawing from the pile, not
-		 * from the face-up cards)
-		 */
-
-		/* This call would allow player to draw destination tickets */
-		super.drawDestinationTickets();
+		// // TODO anealing
+		// if (super.getNumTrainCardsByColor(maxNumOfColor()) > 5) {
+		//
+		// for (Route route : Routes.getInstance().getAllRoutes()) {
+		// if (!isRouteClaimed(route)) {
+		// super.claimRoute(route, route.getColor());
+		// }
+		// }
+		// }
 
 	}
 
 	/*
-	 * Returns a boolean whether you can afford the parameter ticket
+	 * This method returns the color of the max number.
+	 */
+	public TrainCardColor maxNumOfColor() {
+		HashMap<TrainCardColor, Integer> color = new HashMap<TrainCardColor, Integer>();
+
+		color.put(TrainCardColor.black,
+				super.getNumTrainCardsByColor(TrainCardColor.black));
+		color.put(TrainCardColor.blue,
+				super.getNumTrainCardsByColor(TrainCardColor.blue));
+		color.put(TrainCardColor.green,
+				super.getNumTrainCardsByColor(TrainCardColor.green));
+		color.put(TrainCardColor.orange,
+				super.getNumTrainCardsByColor(TrainCardColor.orange));
+		color.put(TrainCardColor.purple,
+				super.getNumTrainCardsByColor(TrainCardColor.purple));
+		color.put(TrainCardColor.red,
+				super.getNumTrainCardsByColor(TrainCardColor.red));
+		color.put(TrainCardColor.white,
+				super.getNumTrainCardsByColor(TrainCardColor.white));
+		color.put(TrainCardColor.yellow,
+				super.getNumTrainCardsByColor(TrainCardColor.yellow));
+		ArrayList<Integer> values = new ArrayList<Integer>(color.values());
+		Collections.sort(values);
+		System.out.println(values);
+		for (TrainCardColor key : color.keySet()) {
+			if (color.get(key).equals(values.get(values.size() - 1))) {
+				return key;
+			}
+		}
+		return null;
+
+	}
+
+	/*
+	 * This method returns the number of rainbow card, if facing up. Default
+	 * return 0, from the deck
+	 */
+	public int drawCard() {
+		ArrayList<TrainCard> cards = super.getFaceUpCards();
+		for (int i = 0; i < cards.size(); i++) {
+			if (cards.get(i).getColor().equals(TrainCardColor.rainbow)) {
+				return i + 1;
+			}
+		}
+		return 0;
+	}
+
+	/*-
+	 * Returns the next best route to buy. 
+	 * 1) Eliminate those has been claimed.
+	 * 2) Eliminate those non-gray routes that are not affordable.
+	 * 3) Include those gray route , which cost less than the max number Card of a color
+	 * 4) If the final result is a gray card, use the max number card, instead of rainbow
 	 */
 	public Route nextTicketRouteToBuy(DestinationTicket ticket) {
-		Stack<Route> route = shortestPath(ticket.getFrom(), ticket.getTo());
-		// System.out.println("shortest path from " + ticket.getFrom() + " to "
-		// + ticket.getTo() + " is\n" + route);
-		Route temp = route.pop();
 		// return a stack of the shortest path from Dest to Dest
+		Stack<Route> route = shortestPath(ticket.getFrom(), ticket.getTo());
+		// System.out.println("The shortest path is " + route + "\nIn total of "
+		// + route.size());
+		ArrayList<Route> grayRoutes = new ArrayList<Route>();
 
-		// for each route, if i have claimed it, then move to the next route
 		for (int i = 0; i < route.size(); i++) {
-
-			if (checkIfIClaimed(route.get(i))) {
-				System.out.println(route.get(i) + " is claimed by me already");
-				continue;
+			if (!route.isEmpty() && isRouteClaimed(route.get(i))) {
+				route.remove(i);
+				i--;
 			}
-			// else return the max cost of the route and the color i can afford
-			else {
-				if (route.get(i).getCost() >= temp.getCost()
-						&& super.getNumTrainCardsByColor(route.get(i)
-								.getColor()) > route.get(i).getCost()) {
-					System.out.println(route.get(i) + " has greater cost then "
-							+ temp + ", replacing temp with ~");
-					System.out.println("You have "
-							+ super.getNumTrainCardsByColor(route.get(i)
-									.getColor()) + " cards of "
-							+ route.get(i).getColor());
-					temp = route.get(i);
-					// route.push(temp);
+		}
+		System.out.println("After claim filter, route has " + route.size());
+
+		for (int i = 0; i < route.size(); i++) {
+			if (!route.isEmpty()) {
+				if (!route.get(i).getColor().equals(TrainCardColor.rainbow)) {
+					if (super.getNumTrainCardsByColor(route.get(i).getColor()) < route
+							.get(i).getCost()) {
+						route.remove(i);
+						i--;
+					}
+				}
+				// such route is gray
+				else if (super.getNumTrainCardsByColor(maxNumOfColor()) >= route
+						.get(i).getCost()) {
+					grayRoutes.add(route.get(i));
 				}
 			}
 		}
-		// System.out.println("The longest route is " + temp);
-		return temp;
+		System.out.println("After color filter, route has " + route.size());
+
+		if (!route.isEmpty()) {
+			Route temp = route.peek();
+			for (int i = 0; i < route.size(); i++) {
+				if (route.get(i).getCost() > temp.getCost()) {
+					if (route.get(i).getOwner() == null) {
+						temp = route.get(i);
+
+					}
+				}
+			}
+			System.out.println("Finally, we are going to buy " + temp
+					+ ", which worth " + temp.getCost() + " and we have "
+					+ super.getNumTrainCardsByColor(temp.getColor()));
+
+			if (grayRoutes.contains(temp)) {
+				System.out.println("It's a gray route of " + temp.getCost()
+						+ ", using " + maxNumOfColor() + ", which we have "
+						+ super.getNumTrainCardsByColor(maxNumOfColor()));
+				super.claimRoute(temp, maxNumOfColor());
+			} else {
+				super.claimRoute(temp, temp.getColor());
+			}
+
+			return temp;
+		}
+
+		return null;
+	}
+
+	/*
+	 * This method checks if among the optimal path of a ticket, at least one
+	 * route is affordable
+	 */
+	public boolean existAffordableRoute(DestinationTicket ticket) {
+		Stack<Route> route = shortestPath(ticket.getFrom(), ticket.getTo());
+		for (int i = 0; i < route.size(); i++) {
+			if (route.get(i).getCost() <= super.getNumTrainCardsByColor(route
+					.get(i).getColor())) {
+
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -265,6 +382,19 @@ public class ShaoPlayer extends Player {
 	}
 
 	/*
+	 * Sort the given ArrayList of Route to descending order of cost
+	 */
+	public ArrayList<DestinationTicket> sortDescenDestinTickets(
+			ArrayList<DestinationTicket> tickets) {
+		// sort the list in ascending order of cost
+		((List<DestinationTicket>) tickets).sort((o1, o2) -> Integer.compare(
+				o1.getValue(), o2.getValue()));
+		// reverse the list so that the larger cost will be bought first
+		Collections.reverse(tickets);
+		return tickets;
+	}
+
+	/*
 	 * Return an ArrayList of Routes that has not been claimed
 	 */
 	public ArrayList<Route> possibleRoutes() {
@@ -280,18 +410,32 @@ public class ShaoPlayer extends Player {
 				// save the current route's color and cost
 				TrainCardColor color = nextRoute.getColor();
 				int cost = nextRoute.getCost();
+
+				if (color.equals(TrainCardColor.rainbow)
+						&& super.getNumTrainCardsByColor(maxNumOfColor()) >= cost) {
+					System.out.println("has "
+							+ super.getNumTrainCardsByColor(maxNumOfColor())
+							+ ", require " + cost);
+					ret.add(nextRoute);
+				} else
+
 				// if player has more than the required cost of such color,
 				// add to return ArrayList
 				if (super.getNumTrainCardsByColor(color) >= cost) {
-					// System.out.println("color is " + color + ", cost is "
-					// + cost + ". Player currently has "
-					// + super.getNumTrainCardsByColor(color) + " "
-					// + color + " train cards.");
+
 					ret.add(nextRoute);
 				}
 			}
 		}
 		return ret;
+	}
+
+	public boolean anyClaimedRouteBetween(Destination dest1, Destination dest2) {
+		for (int j = 0; j < getRoutes(dest1, dest2).size(); j++) {
+			if (isRouteClaimed(getRoutes(dest1, dest2).get(j)) == true)
+				return true;
+		}
+		return false;
 	}
 
 	/**
@@ -343,15 +487,6 @@ public class ShaoPlayer extends Player {
 			}
 
 		}
-		for (Route route : Routes.getInstance().getAllRoutes()) {
-			if (route.getDest1() == from && route.getDest2() == to) {
-				System.out.println("TEST3");
-				if (route.getOwner() == null) {
-					System.out.println("TEST4");
-					return route;
-				}
-			}
-		}
 		System.out.println("RETURNING NULL");
 		return null;
 	}
@@ -360,33 +495,5 @@ public class ShaoPlayer extends Player {
 	 * return false if all routes has been claimed by opponent or this Player
 	 * has claimed one
 	 */
-	public boolean checkClaimable(Destination from, Destination to) {
-		System.out.println("Checking claimable... ");
 
-		for (Route route : Routes.getInstance().getAllRoutes()) {
-			if (route.getDest1() == from && route.getDest2() == to) {
-				System.out.println("Found a route between " + from + " and "
-						+ to + " , checking for owner...");
-				if (route.getOwner() == null) {
-					System.out.println("Such route has no owner");
-					return true;
-				} else if (route.getOwner().getName().equals(this.getName())) {
-					System.out.println("Such route's owner is "
-							+ this.getName());
-					return false;
-				}
-			}
-		}
-		System.out
-				.println("No condition in checkClaimable met, returning NO claimable");
-		return false;
-	}
-
-	public boolean checkIfIClaimed(Route route) {
-		if (route.getOwner() == null)
-			return false;
-		else {
-			return route.getOwner().getName().equals(this.getName());
-		}
-	}
 }
