@@ -46,7 +46,7 @@ public class FullCourseTester implements IEventListener{
 	int p1Index = 0;
 	int p2Index = 0;
 	int gameNum = 0;
-	int MAX_GAMES = 3;
+	int MAX_GAMES = 2;
 	
 	/**
 	 * Play the next game in the loop

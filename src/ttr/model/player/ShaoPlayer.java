@@ -3,13 +3,10 @@ package ttr.model.player;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.Stack;
 
-import com.sun.corba.se.impl.orbutil.graph.Node;
-
+import sun.security.krb5.internal.Ticket;
 import ttr.model.destinationCards.Destination;
 import ttr.model.destinationCards.DestinationTicket;
 import ttr.model.destinationCards.Route;
@@ -36,12 +33,6 @@ public class ShaoPlayer extends Player {
 	 * */
 	@Override
 	public void makeMove() {
-		// return a stack of the shortest path from Dest to Dest
-		shortestPath(Destination.Toronto, Destination.Charleston);
-		// TODO starts coding from here
-		// TODO buy ticket routes first
-		// TODO write another find shortest path method to deal with claimed
-		// routes
 
 		// Store all affordable routes in the ArrayList
 		ArrayList<Route> possRoutes = possibleRoutes();
@@ -53,42 +44,88 @@ public class ShaoPlayer extends Player {
 		 * test and see if any destination ticket is affordable
 		 */
 		// iterate through the tickets
-		for (DestinationTicket ticket : super.getDestinationTickets()) {
-			// TODO check possibility and affordability of each owned ticket
-		}
+		for (int i = 0; i < super.getDestinationTickets().size(); i++) {
+			Route nextToBuy = nextTicketRouteToBuy(super
+					.getDestinationTickets().get(i));
 
-		if (!possRoutes.isEmpty()) {
-			// System.out.println("Player has "
-			// + super.getNumTrainCardsByColor(possRoutes.get(0)
-			// .getColor()) + " " + possRoutes.get(0).getColor()
-			// + " cards.\nThe cost of desired path is "
-			// + possRoutes.get(0).getCost());
-			super.claimRoute(possRoutes.get(0), possRoutes.get(0).getColor());
+			if (checkClaimable(nextToBuy.getDest1(), nextToBuy.getDest2())) {
+				if (super.getNumTrainCardsByColor(nextToBuy.getColor()) >= nextToBuy
+						.getCost()) {
+					System.out.println("Shao is going to buy "
+							+ nextToBuy
+							+ "\nHe has "
+							+ super.getNumTrainCardsByColor(nextToBuy
+									.getColor())
+							+ " cards, and purchase requires "
+							+ nextToBuy.getCost());
+					super.claimRoute(nextToBuy, nextToBuy.getColor());
+
+				} else {
+					System.out.println("But Not Enough Money");
+				}
+			} else if (!possRoutes.isEmpty()) {
+				// System.out.println("Player has "
+				// + super.getNumTrainCardsByColor(possRoutes.get(0)
+				// .getColor()) + " " + possRoutes.get(0).getColor()
+				// + " cards.\nThe cost of desired path is "
+				// + possRoutes.get(0).getCost());
+				System.out.println("Shao is going to buy "
+						+ nextToBuy
+						+ "\nHe has "
+						+ super.getNumTrainCardsByColor(possRoutes.get(0)
+								.getColor()) + " cards, and purchase requires "
+						+ possRoutes.get(0).getCost());
+				super.claimRoute(possRoutes.get(0), possRoutes.get(0)
+						.getColor());
+			}
 		}
+		super.drawTrainCard(0);
 
 		/*
 		 * Always draw train cards (0 means we are drawing from the pile, not
 		 * from the face-up cards)
 		 */
-		super.drawTrainCard(0);
 
 		/* This call would allow player to draw destination tickets */
 		super.drawDestinationTickets();
 
-		/*
-		 * Something like this will allow an AI to attempt to buy a route on the
-		 * board. The first param is the route they wish to buy, the second
-		 * param is the card color they wish to pay for the route with (some
-		 * routes have options here)
-		 */
-		super.claimRoute(new Route(Destination.Atlanta, Destination.Miami, 6,
-				TrainCardColor.blue), TrainCardColor.blue);
+	}
 
-		/*
-		 * NOTE: This is just an example, a player cannot actually do all three
-		 * of these things in one turn. The simulator won't allow it
-		 */
+	/*
+	 * Returns a boolean whether you can afford the parameter ticket
+	 */
+	public Route nextTicketRouteToBuy(DestinationTicket ticket) {
+		Stack<Route> route = shortestPath(ticket.getFrom(), ticket.getTo());
+		// System.out.println("shortest path from " + ticket.getFrom() + " to "
+		// + ticket.getTo() + " is\n" + route);
+		Route temp = route.pop();
+		// return a stack of the shortest path from Dest to Dest
 
+		// for each route, if i have claimed it, then move to the next route
+		for (int i = 0; i < route.size(); i++) {
+
+			if (checkIfIClaimed(route.get(i))) {
+				System.out.println(route.get(i) + " is claimed by me already");
+				continue;
+			}
+			// else return the max cost of the route and the color i can afford
+			else {
+				if (route.get(i).getCost() >= temp.getCost()
+						&& super.getNumTrainCardsByColor(route.get(i)
+								.getColor()) > route.get(i).getCost()) {
+					System.out.println(route.get(i) + " has greater cost then "
+							+ temp + ", replacing temp with ~");
+					System.out.println("You have "
+							+ super.getNumTrainCardsByColor(route.get(i)
+									.getColor()) + " cards of "
+							+ route.get(i).getColor());
+					temp = route.get(i);
+					// route.push(temp);
+				}
+			}
+		}
+		// System.out.println("The longest route is " + temp);
+		return temp;
 	}
 
 	/**
@@ -111,7 +148,8 @@ public class ShaoPlayer extends Player {
 	}
 
 	/**
-	 * Returns a stack of the shortest path between two cities.
+	 * Returns a stack of the shortest path between two cities, including those
+	 * that I have claimed.
 	 * */
 	public Stack<Route> shortestPath(Destination from, Destination to) {
 		Stack<Route> rt = new Stack<Route>();
@@ -154,10 +192,14 @@ public class ShaoPlayer extends Player {
 
 			/*
 			 * Get all the neighbors of the next city that aren't on open or
-			 * closed lists already
+			 * closed lists already OR no route is claimable between next and
+			 * neighbor
 			 */
 			for (Destination neighbor : getNeighbors(next)) {
-				if (closedList.containsKey(neighbor))
+				// boolean claimable = checkClaimable(next, neighbor);
+				if (closedList.containsKey(neighbor)
+				// || !claimable
+				)
 					continue;
 
 				/*
@@ -169,13 +211,20 @@ public class ShaoPlayer extends Player {
 				for (Route routeToNeighbor : routesToNeighbor) {
 					int newCost = closedList.get(next)
 							+ routeToNeighbor.getCost();
+					// a boolean to see if such route is claimed by someone
+					boolean byMe = true;
+					// if claimed, then see if it is claimed by me
+					// also return true if no one claimed
+					if (routeToNeighbor.getOwner() != null)
+						byMe = routeToNeighbor.getOwner().getName()
+								.equals(this.getName());
 
 					if (openList.containsKey(neighbor)) {
-						if (newCost < openList.get(neighbor)) {
+						if (newCost < openList.get(neighbor) && byMe) {
 							parent.put(neighbor, next);
 							openList.put(neighbor, newCost);
 						}
-					} else {
+					} else if (!openList.containsKey(neighbor) && byMe) {
 						openList.put(neighbor, newCost);
 						parent.put(neighbor, next);
 					}
@@ -185,6 +234,7 @@ public class ShaoPlayer extends Player {
 
 		// push the last city to destination to the stack
 		rt.push(getOneWayRoute(parent.get(to), to));
+
 		// recursively push route to the stack until the starting city
 		return printRoute(parent, parent.get(to), rt);
 	}
@@ -233,8 +283,10 @@ public class ShaoPlayer extends Player {
 				// if player has more than the required cost of such color,
 				// add to return ArrayList
 				if (super.getNumTrainCardsByColor(color) >= cost) {
-					// System.out.println("color is "+color+
-					// ", cost is "+cost+". Player currently has "+super.getNumTrainCardsByColor(color)+" "+color+" train cards.");
+					// System.out.println("color is " + color + ", cost is "
+					// + cost + ". Player currently has "
+					// + super.getNumTrainCardsByColor(color) + " "
+					// + color + " train cards.");
 					ret.add(nextRoute);
 				}
 			}
@@ -278,18 +330,63 @@ public class ShaoPlayer extends Player {
 	}
 
 	/**
-	 * Returns the route objects between the given cities if it exists (returns
-	 * null if not exist)
-	 * Return a random one if two routes exist TODO see if this is ok
+	 * Returns the route objects between the given cities if that this player
+	 * has claimed, IF NOT, return those that no one has claimed (returns null
+	 * if not exist) Return a random one if two routes exist
 	 * */
 	public Route getOneWayRoute(Destination from, Destination to) {
 
 		for (Route route : Routes.getInstance().getAllRoutes()) {
-			if (route.getDest1() == from && route.getDest2() == to) {
+			if ((route.getDest1() == from && route.getDest2() == to)
+					|| (route.getDest1() == to && route.getDest2() == from)) {
 				return route;
 			}
+
 		}
+		for (Route route : Routes.getInstance().getAllRoutes()) {
+			if (route.getDest1() == from && route.getDest2() == to) {
+				System.out.println("TEST3");
+				if (route.getOwner() == null) {
+					System.out.println("TEST4");
+					return route;
+				}
+			}
+		}
+		System.out.println("RETURNING NULL");
 		return null;
 	}
 
+	/*
+	 * return false if all routes has been claimed by opponent or this Player
+	 * has claimed one
+	 */
+	public boolean checkClaimable(Destination from, Destination to) {
+		System.out.println("Checking claimable... ");
+
+		for (Route route : Routes.getInstance().getAllRoutes()) {
+			if (route.getDest1() == from && route.getDest2() == to) {
+				System.out.println("Found a route between " + from + " and "
+						+ to + " , checking for owner...");
+				if (route.getOwner() == null) {
+					System.out.println("Such route has no owner");
+					return true;
+				} else if (route.getOwner().getName().equals(this.getName())) {
+					System.out.println("Such route's owner is "
+							+ this.getName());
+					return false;
+				}
+			}
+		}
+		System.out
+				.println("No condition in checkClaimable met, returning NO claimable");
+		return false;
+	}
+
+	public boolean checkIfIClaimed(Route route) {
+		if (route.getOwner() == null)
+			return false;
+		else {
+			return route.getOwner().getName().equals(this.getName());
+		}
+	}
 }
