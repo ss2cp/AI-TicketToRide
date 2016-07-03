@@ -44,7 +44,7 @@ public class ShaoPlayer extends Player {
 		// if no more dest ticket, pick from possRoutes
 		if (super.getTotalDestTicketCost() == 0) {
 			if (!possRoutes.isEmpty()) {
-				System.out.println("poss: " + possRoutes);
+//				System.out.println("poss: " + possRoutes);
 				if (possRoutes.get(0).getColor().equals(TrainCardColor.rainbow)) {
 					super.claimRoute(possRoutes.get(0), maxNumOfColor());
 				} else {
@@ -65,14 +65,14 @@ public class ShaoPlayer extends Player {
 			for (int i = 0; i < tickets.size(); i++) {
 				// return true if at least one route in ticket is affordable
 				if (existAffordableRoute(tickets.get(i))) {
-					System.out.println("ticket " + i
-							+ " DOES have affordable route");
+//					System.out.println("ticket " + i
+//							+ " DOES have affordable route");
 					nextTicketRouteToBuy(tickets.get(i));
 				}
 
 				else {
-					System.out.println("ticket " + i
-							+ " does NOT have affordable route");
+//					System.out.println("ticket " + i
+//							+ " does NOT have affordable route");
 				}
 			}
 
@@ -91,8 +91,8 @@ public class ShaoPlayer extends Player {
 					if (nextToBuy != null
 							&& nextToBuy.getColor().equals(
 									super.getFaceUpCards().get(j))) {
-						System.out
-								.println("Found a card that match needed color, drawing it...");
+//						System.out
+//								.println("Found a card that match needed color, drawing it...");
 						super.drawTrainCard(j + 1);
 					}
 				}
@@ -137,7 +137,7 @@ public class ShaoPlayer extends Player {
 				super.getNumTrainCardsByColor(TrainCardColor.yellow));
 		ArrayList<Integer> values = new ArrayList<Integer>(color.values());
 		Collections.sort(values);
-		System.out.println(values);
+//		System.out.println(values);
 		for (TrainCardColor key : color.keySet()) {
 			if (color.get(key).equals(values.get(values.size() - 1))) {
 				return key;
@@ -181,7 +181,7 @@ public class ShaoPlayer extends Player {
 				i--;
 			}
 		}
-		System.out.println("After claim filter, route has " + route.size());
+//		System.out.println("After claim filter, route has " + route.size());
 
 		for (int i = 0; i < route.size(); i++) {
 			if (!route.isEmpty()) {
@@ -199,7 +199,7 @@ public class ShaoPlayer extends Player {
 				}
 			}
 		}
-		System.out.println("After color filter, route has " + route.size());
+//		System.out.println("After color filter, route has " + route.size());
 
 		if (!route.isEmpty()) {
 			Route temp = route.peek();
@@ -211,14 +211,14 @@ public class ShaoPlayer extends Player {
 					}
 				}
 			}
-			System.out.println("Finally, we are going to buy " + temp
-					+ ", which worth " + temp.getCost() + " and we have "
-					+ super.getNumTrainCardsByColor(temp.getColor()));
+//			System.out.println("Finally, we are going to buy " + temp
+//					+ ", which worth " + temp.getCost() + " and we have "
+//					+ super.getNumTrainCardsByColor(temp.getColor()));
 
 			if (grayRoutes.contains(temp)) {
-				System.out.println("It's a gray route of " + temp.getCost()
-						+ ", using " + maxNumOfColor() + ", which we have "
-						+ super.getNumTrainCardsByColor(maxNumOfColor()));
+//				System.out.println("It's a gray route of " + temp.getCost()
+//						+ ", using " + maxNumOfColor() + ", which we have "
+//						+ super.getNumTrainCardsByColor(maxNumOfColor()));
 				super.claimRoute(temp, maxNumOfColor());
 			} else {
 				super.claimRoute(temp, temp.getColor());
@@ -414,9 +414,9 @@ public class ShaoPlayer extends Player {
 
 				if (color.equals(TrainCardColor.rainbow)
 						&& super.getNumTrainCardsByColor(maxNumOfColor()) >= cost) {
-					System.out.println("has "
-							+ super.getNumTrainCardsByColor(maxNumOfColor())
-							+ ", require " + cost);
+//					System.out.println("has "
+//							+ super.getNumTrainCardsByColor(maxNumOfColor())
+//							+ ", require " + cost);
 					ret.add(nextRoute);
 				} else
 
@@ -488,7 +488,7 @@ public class ShaoPlayer extends Player {
 			}
 
 		}
-		System.out.println("RETURNING NULL");
+//		System.out.println("RETURNING NULL");
 		return null;
 	}
 

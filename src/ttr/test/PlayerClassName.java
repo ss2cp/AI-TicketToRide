@@ -7,6 +7,6 @@ package ttr.test;
  * */
 public enum PlayerClassName {
 
-	SuperPlayer, ShaoPlayer;
+	SuperPlayer, ShaoPlayer, BasicPlayer;
 
 }
