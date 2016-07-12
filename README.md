@@ -1,7 +1,7 @@
 # AI_3_TicketToRide
 An AI agent to play board game Ticket to Ride
 
-![alt tag](https://raw.githubusercontent.com/ss2cp/AI_HW3/master/ScreenShot.png)
+![GameBoard](https://raw.githubusercontent.com/ss2cp/AI_HW3/master/ScreenShot.png)
 
 ## Background
 This program uses BFS Search to find the shortest path between two cities, and Simulated Annealing to determine some of the actions to make. The simulator code was provided.
