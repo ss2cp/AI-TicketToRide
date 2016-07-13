@@ -68,7 +68,7 @@ dicisionMake(){
 }
 ```
 ##Simulated Annealing
-Two sepertate annealing factor functions for early game strategy and later game strategy. In later game, the probability of drawing cards drops faster. 
+Two sepertate annealing factor functions for early game strategy and later game strategy. In later games, the probability of drawing cards drops faster. 
 
 ![Annealing Factor Graph](https://raw.githubusercontent.com/ss2cp/AI_HW3/master/imgs/annealing.png)
 
