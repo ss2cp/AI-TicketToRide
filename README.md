@@ -67,6 +67,10 @@ dicisionMake(){
   		drawTrainTicket // prefer rainbow cards
 }
 ```
+###Annealing Factor Graph
+Two sepertate functions for early game strategy and later game strategy. In later game, the probability of drawing cards drops faster. 
+
+![Annealing Factor Graph](https://raw.githubusercontent.com/ss2cp/AI_HW3/master/imgs/annealing.png)
 
 ## Testing
 We created 4 players for testing. We let MainPlayer play 50 games against the other 3 players. (25 where opponent went first)
