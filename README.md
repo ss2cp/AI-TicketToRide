@@ -22,6 +22,11 @@ This program uses BFS Search to find the shortest path between two cities, and S
 
 **Language:** Java
 
+## Usage
+Under `src/ttr.model/player` are the players created to play the game.
+
+Run `src/ttr.main/TTRMain` to start the GUI and the game.
+
 ## Game Strategy
 After a brief analysis of how human play this game, we found the following strategies:
 
@@ -92,7 +97,12 @@ The results are as followed:
 | Main algorithm  | BasicPlayer |82.85|76.29|6.56|
 | Main algorithm  | StupidPlayer|90.94|0.00|90.94|
 
+##Annalysis
 
-Inside src/ttr/model/player are the players created to play the game.
+The key observation we made in regards to winning games is the importance of finishing your destination tickets. Many games in which our main algorithm was able to beat ShaoPlayer are games where ShaoPlayer was not able to complete his destination tickets while own main algorithm did. This not only provides a penalty differential more favorable to our main algorithm, but also shows a more efficient use of card drawing.
+
+We were surprised that ShaoPlayer was able to defeat our main algorithm more often. Our main algorithm’s annealing factor does not kick in until it has completed its destination tickets, before which point, ShaoPlayer and the main algorithm actually utilize the same algorithm in drawing cards and claiming routes. Thus, the fact that our main algorithm loses more often and most losses are happen when it fails to complete its destination tickets shows that its annealing factor did not have an impact on the game since it did not get to utilize that part of the algorithm, and that many games are won or lost on pure luck of the draw when the initial destination tickets are given.
+
+
 
 
