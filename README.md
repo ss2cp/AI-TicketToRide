@@ -35,7 +35,7 @@ After a brief analysis of how human play this game, we found the following strat
 3. **Prioritize longer routes first.** Since the Value Per Train increases as the route becomes longer, the longer routes give a much better return on our investment and thus should be prioritized.
 4. **If impossible to finish destination ticket, buy most expensive ones.** Normally, an average game with our algorithm will take up to 130 turns in total. So we implemented an annealing factor to deal with later in the game where the algorithm may not be able to finish the destination ticket.
 
-##Pseudo Code for Decision Making
+##Pseudo Code for Annealing Factor
 ```java
 annealingFactor(){
   if turn < 40
@@ -43,7 +43,9 @@ annealingFactor(){
   Else
 	  annealingFactor = (1 - (turn / 100)) * 100
 }
-
+```
+##Pseudo Code for Decision Making
+```java
 dicisionMake(){
   turn++ // increment turns counter
   TICKETS // set of all destination tickets in hand
