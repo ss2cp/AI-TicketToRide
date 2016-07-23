@@ -1,4 +1,4 @@
-# AI_3_TicketToRide
+# AI-TicketToRide
 An AI agent to play board game Ticket to Ride
 
 ![GameBoard](https://raw.githubusercontent.com/ss2cp/AI_HW3/master/ScreenShot.png)
