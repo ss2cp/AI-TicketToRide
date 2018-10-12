@@ -35,7 +35,7 @@ After a brief analysis of how human play this game, we found the following strat
 3. **Prioritize longer routes first.** Since the Value Per Train increases as the route becomes longer, the longer routes give a much better return on our investment and thus should be prioritized.
 4. **If impossible to finish destination ticket, buy most expensive ones.** Normally, an average game with our algorithm will take up to 130 turns in total. So we implemented an annealing factor to deal with later in the game where the algorithm may not be able to finish the destination ticket.
 
-##Pseudo Code for Annealing Factor
+## Pseudo Code for Annealing Factor
 ```java
 annealingFactor(){
   if turn < 40
@@ -44,7 +44,7 @@ annealingFactor(){
 	  annealingFactor = (1 - (turn / 100)) * 100
 }
 ```
-##Pseudo Code for Decision Making
+## Pseudo Code for Decision Making
 ```java
 dicisionMake(){
   turn++ // increment turns counter
@@ -74,20 +74,20 @@ dicisionMake(){
   		drawTrainTicket // prefer rainbow cards
 }
 ```
-##Simulated Annealing
+## Simulated Annealing
 Two sepertate annealing factor functions for early game strategy and later game strategy. In later games, the probability of drawing cards drops faster. 
 
 ![Annealing Factor Graph](https://raw.githubusercontent.com/ss2cp/AI_HW3/master/imgs/annealing.png)
 
 ## Testing
 We created 4 players for testing. We let MainPlayer play 50 games against the other 3 players. (25 where opponent went first)
-####MainPlayer
+#### MainPlayer
 MainPlayer implements the pseudo code given above.
-####ShaoPlayer
+#### ShaoPlayer
 ShaoPlayer implements a very similar algorithm as our main algorithm does, with the exception that ShaoPlayer does not use annealing.
-####BasicPlayer
+#### BasicPlayer
 BasicPlayer’s strategy is to buy routes as soon as it can afford one. This strategy leads to a hoarding of short routes, which can potentially lead to blocking a path the opponent has planned.
-####StupidPlayer
+#### StupidPlayer
 The baseline case is StupidPlayer. It only draws card and does nothing else. 
 
 ## Results
@@ -99,7 +99,7 @@ The results are as followed:
 | Main algorithm  | BasicPlayer |82.85|76.29|6.56|
 | Main algorithm  | StupidPlayer|90.94|0.00|90.94|
 
-##Annalysis
+## Annalysis
 
 The key observation we made in regards to winning games is the importance of finishing your destination tickets. Many games in which our main algorithm was able to beat ShaoPlayer are games where ShaoPlayer was not able to complete his destination tickets while own main algorithm did. This not only provides a penalty differential more favorable to our main algorithm, but also shows a more efficient use of card drawing.
 
