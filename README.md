@@ -18,7 +18,7 @@ This program uses BFS Search to find the shortest path between two cities, and S
 
 - Finishing destination cards will get a reward of the cost of that route, not finishing them will result in negative punishment of the reward. 
 
-**Goal:** Within 200 turns, or before train cards run out, who has the higher points wins.
+**Goal:** Within 200 turns, or before train cards run out, the player with higher points wins.
 
 **Language:** Java
 
